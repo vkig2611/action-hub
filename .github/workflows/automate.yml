@@ -1,0 +1,27 @@
+name: Upload .bru File to Slack
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  zip_and_send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Zip .bru File
+        run: zip -r collection.zip collection.bru
+
+      - name: Send to Slack
+        env:
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          CHANNEL_ID: "your-channel-id"
+        run: |
+          curl -F file=@collection.zip \
+               -F "initial_comment=Latest API test collection" \
+               -F "channels=$CHANNEL_ID" \
+               -H "Authorization: Bearer $SLACK_TOKEN" \
+               https://slack.com/api/files.upload
